@@ -29,7 +29,10 @@ app.use("/drops", dropRoutes);
 app.use("/sales", saleRoutes);
 app.use("/stats", statsRoutes);
 
-const port = process.env.PORT || "4000";
+const port = process.env.PORT;
+if (!port) {
+  throw new Error("PORT environment variable is required");
+}
 
 const start = async () => {
   await connectMongo();
