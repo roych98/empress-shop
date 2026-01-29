@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { env } from "../config/env";
 import { UserRole } from "../models/User";
 
 export interface AuthedRequest extends Request {
@@ -27,7 +26,7 @@ export const authMiddleware = (
   }
 
   try {
-    const payload = jwt.verify(token, env.jwtSecret) as {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
       id: string;
       role: UserRole;
       email: string;

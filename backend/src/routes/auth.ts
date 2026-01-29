@@ -2,7 +2,6 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User";
-import { env } from "../config/env";
 
 const router = Router();
 
@@ -32,7 +31,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      env.jwtSecret
+      process.env.JWT_SECRET!
     );
 
     return res.status(201).json({
@@ -65,7 +64,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      env.jwtSecret
+      process.env.JWT_SECRET!
     );
 
     return res.json({

@@ -1,6 +1,6 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { env } from "./config/env";
 import { connectMongo } from "./db/connection";
 import authRoutes from "./routes/auth";
 import playerRoutes from "./routes/players";
@@ -13,7 +13,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: env.corsOrigin,
+    origin: process.env.CORS_ORIGIN,
   })
 );
 app.use(express.json());
@@ -29,11 +29,13 @@ app.use("/drops", dropRoutes);
 app.use("/sales", saleRoutes);
 app.use("/stats", statsRoutes);
 
+const port = process.env.PORT || "4000";
+
 const start = async () => {
   await connectMongo();
-  app.listen(env.port, () => {
+  app.listen(port, () => {
     // eslint-disable-next-line no-console
-    console.log(`Backend listening on port ${env.port}`);
+    console.log(`Backend listening on port ${port}`);
   });
 };
 

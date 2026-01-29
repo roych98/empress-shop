@@ -3,12 +3,11 @@ services:
     build:
       context: ./backend
     restart: unless-stopped
-    environment:
-      - CORS_ORIGIN=http://localhost:5173
+    env_file:
+      - path: ./backend/.env
+        required: false
     ports:
       - "4000:4000"
-    depends_on:
-      - mongo
 
   frontend:
     build:

@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
-import { env } from "../config/env";
 
 export const connectMongo = async () => {
+  const mongoUri = process.env.MONGO_URI;
+  if (!mongoUri) {
+    throw new Error("MONGO_URI environment variable is required");
+  }
   try {
-    await mongoose.connect(env.mongoUri);
+    await mongoose.connect(mongoUri);
     // eslint-disable-next-line no-console
     console.log("Connected to MongoDB");
   } catch (err) {
