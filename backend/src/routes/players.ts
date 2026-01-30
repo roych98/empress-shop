@@ -9,12 +9,13 @@ import {
 
 const router = Router();
 
-router.use(authMiddleware);
-
+// Public read-only routes
 router.get("/", listPlayers);
-router.post("/", requireRole(["host"]), createPlayer);
-router.put("/:id", requireRole(["host"]), updatePlayer);
-router.post("/:id/splits/paid", requireRole(["host"]), setPlayerSplitsPaid);
+
+// Protected write routes
+router.post("/", authMiddleware, requireRole(["host"]), createPlayer);
+router.put("/:id", authMiddleware, requireRole(["host"]), updatePlayer);
+router.post("/:id/splits/paid", authMiddleware, requireRole(["host"]), setPlayerSplitsPaid);
 
 export default router;
 

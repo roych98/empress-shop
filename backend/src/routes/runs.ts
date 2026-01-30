@@ -12,15 +12,16 @@ import { setRunSplitsPaid } from "../controllers/runSplits";
 
 const router = Router();
 
-router.use(authMiddleware);
-
+// Public read-only routes
 router.get("/", listRuns);
-router.post("/", requireRole(["host"]), createRun);
 router.get("/:id", getRun);
-router.put("/:id", requireRole(["host"]), updateRun);
-router.delete("/:id", requireRole(["host"]), deleteRun);
 router.get("/:id/summary", getRunSummary);
-router.post("/:id/splits/paid", requireRole(["host"]), setRunSplitsPaid);
+
+// Protected write routes
+router.post("/", authMiddleware, requireRole(["host"]), createRun);
+router.put("/:id", authMiddleware, requireRole(["host"]), updateRun);
+router.delete("/:id", authMiddleware, requireRole(["host"]), deleteRun);
+router.post("/:id/splits/paid", authMiddleware, requireRole(["host"]), setRunSplitsPaid);
 
 export default router;
 

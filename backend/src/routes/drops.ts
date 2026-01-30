@@ -8,16 +8,19 @@ import {
 
 const router = Router();
 
-router.use(authMiddleware);
-
+// Public read-only routes
 router.get("/runs/:runId/drops", listDropsForRun);
+
+// Protected write routes
 router.post(
   "/runs/:runId/drops",
+  authMiddleware,
   requireRole(["host", "runner"]),
   createDropForRun
 );
 router.post(
   "/:dropId/disenchant",
+  authMiddleware,
   requireRole(["host", "runner"]),
   disenchantDrop
 );

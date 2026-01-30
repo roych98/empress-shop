@@ -4,11 +4,12 @@ import { listSales, getSale, createSale } from "../controllers/sales";
 
 const router = Router();
 
-router.use(authMiddleware);
-
+// Public read-only routes
 router.get("/", listSales);
 router.get("/:id", getSale);
-router.post("/", requireRole(["host"]), createSale);
+
+// Protected write routes
+router.post("/", authMiddleware, requireRole(["host"]), createSale);
 
 export default router;
 

@@ -4,8 +4,7 @@ import { getProfileStats } from "../controllers/stats";
 
 const router = Router();
 
-router.use(authMiddleware);
-
+// Public read-only routes
 router.get("/profile", getProfileStats);
 
 export default router;
