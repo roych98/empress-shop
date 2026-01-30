@@ -10,7 +10,7 @@ interface LocationState {
 }
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, continueAsGuest } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
@@ -35,6 +35,12 @@ export function LoginPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleContinueAsGuest = () => {
+    continueAsGuest();
+    const redirectTo = state?.from?.pathname ?? '/';
+    navigate(redirectTo, { replace: true });
   };
 
   return (
@@ -72,6 +78,21 @@ export function LoginPage() {
             {submitting ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+          <p className="muted" style={{ marginBottom: '0.5rem' }}>
+            or
+          </p>
+          <button
+            type="button"
+            className="app-button-ghost"
+            onClick={handleContinueAsGuest}
+          >
+            Continue as Visitor
+          </button>
+          <p className="muted" style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+            View-only access, no editing
+          </p>
+        </div>
       </div>
     </div>
   );

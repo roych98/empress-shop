@@ -7,7 +7,7 @@ interface LayoutShellProps {
 }
 
 export function LayoutShell({ children }: LayoutShellProps) {
-  const { user, logout } = useAuth();
+  const { user, isGuest, logout } = useAuth();
 
   return (
     <div className="app-root">
@@ -41,7 +41,7 @@ export function LayoutShell({ children }: LayoutShellProps) {
       <div className="app-main">
         <header className="app-header">
           <div className="app-header-right">
-            {user && (
+            {user ? (
               <>
                 <span className="app-user">
                   {user.email} ({user.role})
@@ -50,7 +50,14 @@ export function LayoutShell({ children }: LayoutShellProps) {
                   Logout
                 </button>
               </>
-            )}
+            ) : isGuest ? (
+              <>
+                <span className="app-user muted">Visitor (View Only)</span>
+                <Link to="/login" className="app-button-ghost">
+                  Sign In
+                </Link>
+              </>
+            ) : null}
           </div>
         </header>
         <main className="app-content">{children}</main>
