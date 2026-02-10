@@ -1,4 +1,5 @@
 import { Response } from "express";
+import mongoose from "mongoose";
 import { AuthedRequest } from "../middleware/auth";
 import { Sale } from "../models/Sale";
 import { Run } from "../models/Run";
@@ -105,3 +106,87 @@ export const createSale = async (req: AuthedRequest, res: Response) => {
   }
 };
 
+export const updateSale = async (req: AuthedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { totalPriceWS, buyer, remainingUnpaidEntryFeeWS, dropIds } = req.body as {
+      totalPriceWS?: number;
+      buyer?: string;
+      remainingUnpaidEntryFeeWS?: number;
+      dropIds?: string[];
+    };
+
+    const sale = await Sale.findById(id).populate("run");
+    if (!sale) {
+      return res.status(404).json({ message: "Sale not found" });
+    }
+
+    const run = await Run.findById(sale.run);
+    if (!run) {
+      return res.status(404).json({ message: "Run not found" });
+    }
+
+    let needsRecalc = false;
+
+    if (totalPriceWS !== undefined) {
+      sale.totalPriceWS = totalPriceWS;
+      needsRecalc = true;
+    }
+    if (buyer !== undefined) {
+      sale.buyer = buyer;
+    }
+    if (remainingUnpaidEntryFeeWS !== undefined) {
+      needsRecalc = true;
+    }
+
+    // If drops are being changed, update the sale's drops
+    if (dropIds && dropIds.length > 0) {
+      // Remove old drop associations
+      await WeaponDrop.updateMany(
+        { sale: sale._id },
+        { $unset: { sale: "", status: "" } }
+      );
+      // Set new drops
+      sale.drops = dropIds.map((id) => new mongoose.Types.ObjectId(id));
+      // Mark new drops as sold
+      await WeaponDrop.updateMany(
+        { _id: { $in: dropIds } },
+        { $set: { status: "sold", sale: sale._id } }
+      );
+      needsRecalc = true;
+    }
+
+    // Recalculate split if needed
+    if (needsRecalc) {
+      const participants: ParticipantShareInput[] = run.participants.map(
+        (p) => ({
+          playerId: p.player.toString(),
+          shareModifier: p.shareModifier ?? 1,
+        })
+      );
+
+      const { netAfterFeesWS, split } = computeSaleSplit(
+        sale.totalPriceWS,
+        remainingUnpaidEntryFeeWS ?? 0,
+        participants
+      );
+
+      sale.netAfterFeesWS = netAfterFeesWS;
+      sale.splitDetails = split.perParticipant.map((s) => ({
+        player: new mongoose.Types.ObjectId(s.playerId),
+        amountWS: s.amountWS,
+        isPaid: false, // Reset payment status when recalculating
+      }));
+    }
+
+    await sale.save();
+    const populated = await Sale.findById(sale._id)
+      .populate("run")
+      .populate("drops");
+    return res.json(populated);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
+    return res.status(500).json({ message: "Failed to update sale" });
+  }
+};

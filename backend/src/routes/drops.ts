@@ -3,6 +3,7 @@ import { authMiddleware, requireRole } from "../middleware/auth";
 import {
   listDropsForRun,
   createDropForRun,
+  updateDrop,
   disenchantDrop,
 } from "../controllers/drops";
 
@@ -17,6 +18,12 @@ router.post(
   authMiddleware,
   requireRole(["host", "runner"]),
   createDropForRun
+);
+router.put(
+  "/:dropId",
+  authMiddleware,
+  requireRole(["host", "runner"]),
+  updateDrop
 );
 router.post(
   "/:dropId/disenchant",
