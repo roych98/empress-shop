@@ -63,6 +63,17 @@ export function PlayersPage() {
     }
   };
 
+  const handleCopyOwedNames = async () => {
+    const owedPlayers = players.filter((p) => (p.owedWS ?? 0) > 0);
+    const names = owedPlayers.map((p) => p.name).join(',');
+    try {
+      await navigator.clipboard.writeText(names);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to copy to clipboard:', err);
+    }
+  };
+
   useEffect(() => {
     void loadPlayers();
   }, []);
@@ -189,7 +200,19 @@ export function PlayersPage() {
           <div className="table-card card">
             <div className="section-title-row">
               <h2 className="section-title">Players</h2>
-              <span className="pill muted">{players.length} total</span>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                {players.filter((p) => (p.owedWS ?? 0) > 0).length > 0 && (
+                  <button
+                    type="button"
+                    className="app-button-ghost"
+                    onClick={handleCopyOwedNames}
+                    title="Copy names of players you owe WS to"
+                  >
+                    Copy
+                  </button>
+                )}
+                <span className="pill muted">{players.length} total</span>
+              </div>
             </div>
             <div className="table-wrapper">
               <table className="data-table">
